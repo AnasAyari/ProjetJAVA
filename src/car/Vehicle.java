@@ -1,16 +1,22 @@
 package car;
 
-public abstract class Vehicle {
-    protected final String ownerName;
+import user.User;
+
+public abstract class Vehicle implements Ownable<User>, Purchasable {
+    protected final User owner;
     protected final double totalPrice;
 
-    protected Vehicle(String ownerName, double totalPrice) {
-        this.ownerName = ownerName;
+    protected Vehicle(User owner, double totalPrice) {
+        this.owner = owner;
         this.totalPrice = totalPrice;
     }
 
+    public User getOwner() {
+        return owner;
+    }
+
     public String getOwnerName() {
-        return ownerName;
+        return owner.getName();
     }
 
     public double getTotalPrice() {

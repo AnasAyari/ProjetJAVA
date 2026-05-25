@@ -1,7 +1,9 @@
 package car;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Instant;
+
+import receipt.Receipt;
+import user.User;
 
 public class Car extends Vehicle {
 
@@ -14,7 +16,7 @@ public class Car extends Vehicle {
 
     //private constructor(only Builder can create a Car)
     private Car(Builder b) {
-        super(b.ownerName, calcPrice(b));
+        super(b.owner, calcPrice(b));
         this.model      = b.model;
         this.color      = b.color;
         this.engine     = b.engine;
@@ -76,7 +78,7 @@ public class Car extends Vehicle {
     public static class Builder {
 
         // required
-        private final String ownerName;
+        private final User owner;
 
         // optional with defaults
         private CarModel model    = CarModel.SEDAN;
@@ -85,14 +87,18 @@ public class Car extends Vehicle {
         private Wheels   wheels   = Wheels.STEEL_16;
         private Interior interior = Interior.FABRIC;
 
-        public Builder(String ownerName) throws InvalidCarConfigurationException {
+        public Builder(User owner) throws InvalidCarConfigurationException {
+            if (owner == null) {
+                throw new InvalidCarConfigurationException("Owner cannot be null.");
+            }
+            String ownerName = owner.getName();
             if (ownerName == null || ownerName.isBlank()) {
                 throw new InvalidCarConfigurationException("Owner name cannot be empty.");
             }
             if (ownerName.trim().length() < 2) {
                 throw new InvalidCarConfigurationException("Owner name must be at least 2 characters long.");
             }
-            this.ownerName = ownerName.trim();
+            this.owner = owner;
         }
 
         public Builder model   (CarModel m) { this.model    = m; return this; }
@@ -101,6 +107,12 @@ public class Car extends Vehicle {
         public Builder wheels  (Wheels   w) { this.wheels   = w; return this; }
         public Builder interior(Interior i) { this.interior = i; return this; }
 
-        public Car build() { return new Car(this); }
+        public Car build() throws receipt.InvalidReceiptException, user.InvalidUserDataException, DuplicateCarException {
+            Car c = new Car(this);
+            this.owner.addCar(c);
+            Receipt r = new Receipt(c, Instant.now(), c.getTotalPrice());
+            this.owner.addReceipt(r);
+            return c;
+        }
     }
 }
