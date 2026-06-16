@@ -1,5 +1,0 @@
-heritage
-abstract class
-interface
-exeptions
-array list
